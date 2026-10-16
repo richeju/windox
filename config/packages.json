@@ -1,8 +1,19 @@
 {
   "packages": [
-    { "id": "git" },
-    { "id": "vscode" },
-    { "id": "7zip" },
-    { "id": "powershell-core" }
+    {
+      "id": "git"
+    },
+    {
+      "id": "vscode"
+    },
+    {
+      "id": "7zip"
+    },
+    {
+      "id": "powershell-core"
+    },
+    {
+      "id": "thunderbird"
+    }
   ]
 }
