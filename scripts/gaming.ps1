@@ -21,6 +21,49 @@ function Ensure-RaidBotDirectory {
     Write-Host "[OK] Created $path"
 }
 
+function Ensure-RaidBotDefenderExclusion {
+    $path = 'C:\raidbot'
+
+    # This is a machine-wide exclusion; all content in the folder is less protected.
+    $getPreference = Get-Command Get-MpPreference -ErrorAction SilentlyContinue
+    $addPreference = Get-Command Add-MpPreference -ErrorAction SilentlyContinue
+    if (-not $getPreference -or -not $addPreference) {
+        if ($Mode -eq 'Audit') {
+            Write-Host '[UNAVAILABLE] Microsoft Defender exclusion status'
+            return
+        }
+        throw 'Microsoft Defender PowerShell cmdlets are unavailable; cannot add folder exclusion.'
+    }
+
+    $preferences = Get-MpPreference -ErrorAction Stop
+    $existingPaths = @($preferences.ExclusionPath)
+    $isExcluded = @($existingPaths | Where-Object {
+        $candidate = [string]$_
+        $candidate.TrimEnd([char]92) -ieq $path
+    }).Count -gt 0
+
+    if ($isExcluded) {
+        Write-Host "[OK] Microsoft Defender exclusion: $path"
+        return
+    }
+    if ($Mode -eq 'Audit') {
+        Write-Host "[MISSING] Microsoft Defender exclusion: $path"
+        return
+    }
+
+    Add-MpPreference -ExclusionPath $path -ErrorAction Stop
+
+    $after = Get-MpPreference -ErrorAction Stop
+    $added = @($after.ExclusionPath | Where-Object {
+        $candidate = [string]$_
+        $candidate.TrimEnd([char]92) -ieq $path
+    }).Count -gt 0
+    if (-not $added) {
+        throw "Microsoft Defender did not report the requested exclusion: $path"
+    }
+    Write-Host "[OK] Added Microsoft Defender exclusion: $path"
+}
+
 function Find-PlariumPlay {
     $paths = @(
         (Join-Path $env:LOCALAPPDATA 'PlariumPlay\PlariumPlay.exe'),
@@ -146,8 +189,14 @@ function Install-RslXtender {
 
 Ensure-RaidBotDirectory
 
-# Attempt both independent installations, even when one provider fails.
+# Attempt all independent configuration steps even if the Defender policy is managed elsewhere.
 $failures = New-Object 'System.Collections.Generic.List[string]'
+try {
+    Ensure-RaidBotDefenderExclusion
+} catch {
+    Write-Warning "Microsoft Defender exclusion: $($_.Exception.Message)"
+    $failures.Add('Microsoft Defender exclusion')
+}
 try {
     Install-PlariumPlay
 } catch {
