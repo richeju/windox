@@ -1,8 +1,8 @@
 {
   "packages": [
-    { "id": "Git.Git" },
-    { "id": "Microsoft.VisualStudioCode" },
-    { "id": "7zip.7zip" },
-    { "id": "Microsoft.PowerShell" }
+    { "id": "git" },
+    { "id": "vscode" },
+    { "id": "7zip" },
+    { "id": "powershell-core" }
   ]
 }
