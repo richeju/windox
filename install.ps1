@@ -26,7 +26,21 @@ try {
         throw "Missing bootstrap.ps1 in downloaded archive."
     }
     Write-Host "[Windox] Running bootstrap in $mode mode"
-    & $entry -Mode $mode
+    # The ZIP contains unsigned local scripts. Relax policy only for this process
+    # and restore the previous process-scoped setting before returning.
+    $originalPolicy = Get-ExecutionPolicy -Scope Process
+    $changedPolicy = $false
+    try {
+        if ($originalPolicy -ne 'Bypass') {
+            Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+            $changedPolicy = $true
+        }
+        & $entry -Mode $mode
+    } finally {
+        if ($changedPolicy) {
+            Set-ExecutionPolicy -ExecutionPolicy $originalPolicy -Scope Process -Force -ErrorAction SilentlyContinue
+        }
+    }
 } finally {
     Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
 }
