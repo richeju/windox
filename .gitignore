@@ -1,0 +1,10 @@
+# Local overrides, logs and sensitive data
+*.log
+*.tmp
+.env
+.env.*
+*.secret
+secrets/
+local/
+.DS_Store
+Thumbs.db
