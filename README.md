@@ -1,30 +1,35 @@
 # Windox
 
-Reproducible Windows 11 workstation setup and drift correction, powered by PowerShell and WinGet.
+Configure or restore a Windows 11 workstation with **one PowerShell line**. Windox uses **Chocolatey** for packages and applies repeatable Windows settings.
 
-## Run without cloning (fresh Windows install)
+## Run from a fresh Windows installation
 
-From PowerShell (no Git required), first **review** [install.ps1](https://github.com/richeju/windox/blob/main/install.ps1). Running remote scripts directly executes whatever is currently on `main`; use only for a repository you control and trust.
+Open PowerShell and paste this **single line**:
 
-Audit (no changes):
+```powershell
+$env:WINDOX_MODE='Apply'; irm https://raw.githubusercontent.com/richeju/windox/main/install.ps1 | iex
+```
+
+If necessary, Windows displays a UAC prompt to run the installation as administrator. Approve it to continue. No Git clone and no WinGet prerequisite are needed.
+
+What happens:
+1. The small remote launcher downloads the Windox repository into a temporary folder.
+2. `bootstrap.ps1` requests administrator privileges if required.
+3. `scripts/chocolatey.ps1` installs Chocolatey (if missing), then the packages in `config/packages.json`.
+4. `scripts/system.ps1` applies the managed Windows preferences.
+5. The temporary checkout is deleted by the launcher.
+
+A run can be repeated: packages already managed by Chocolatey and settings already matching the desired state are skipped. Packages installed outside Chocolatey are **not** automatically recognized as managed by Chocolatey; review the manifest before running.
+
+### Read-only audit
 
 ```powershell
 irm https://raw.githubusercontent.com/richeju/windox/main/install.ps1 | iex
 ```
 
-Apply (installs missing applications and fixes managed settings):
+Audit is the default and makes **no changes**. When Chocolatey is not installed, Windox reports its absence and cannot yet audit its package inventory. Only `Apply` makes changes.
 
-```powershell
-$env:WINDOX_MODE = 'Apply'
-irm https://raw.githubusercontent.com/richeju/windox/main/install.ps1 | iex
-Remove-Item Env:WINDOX_MODE
-```
-
-The launcher downloads a temporary ZIP of the repository, runs `bootstrap.ps1` with the chosen mode, and cleans up the temporary files. An interrupted session may leave the environment variable set until the session closes. WinGet must be available to install applications. For a stronger trust model, pin a commit and verify the downloaded script or archive hash before running it.
-
-## Quick start
-
-Open **PowerShell** on Windows 11, clone this repository, and run:
+### Run from a local clone
 
 ```powershell
 git clone https://github.com/richeju/windox.git
@@ -33,27 +38,32 @@ cd windox
 .\bootstrap.ps1 -Mode Apply
 ```
 
-If Git is not installed yet, download the repository ZIP from GitHub, extract it, and run the script from the extracted folder.
+You can skip package installation and apply just the Windows settings with `-SkipPackages`; Chocolatey is still checked as a prerequisite.
 
-**Audit is the default**: `.\bootstrap.ps1` only reports missing packages and setting drift. **Apply** installs missing WinGet packages and configures Windows. Commands are intended to be run from a regular, non-elevated user PowerShell session. If script execution is restricted, use a temporary *process-only* execution policy in a trusted session rather than permanently relaxing system policy.
+## Repository
 
-## Files
+```text
+windox/
+├── install.ps1              # Remote ZIP launcher
+├── bootstrap.ps1            # Single orchestration entry point
+├── config/
+│   └── packages.json        # Chocolatey package IDs
+├── scripts/
+│   ├── chocolatey.ps1       # Chocolatey bootstrap and package convergence
+│   └── system.ps1           # Idempotent Windows settings
+└── .gitignore
+```
 
-- `bootstrap.ps1`: single entry point; safe-by-default audit or explicit apply.
-- `config/packages.json`: desired WinGet package IDs. Edit to suit your workstation.
-- `scripts/system.ps1`: idempotent, user-scoped Windows settings.
-- `.gitignore`: excludes common local secrets and generated files.
+Initial applications: `git`, `vscode`, `7zip`, and `powershell-core`.
 
-## Design
+## Design and safety
 
-- **Re-runnable:** installed packages and matching settings are skipped.
-- **Reviewable:** dry-run-style Audit before Apply.
-- **Conservative:** no automatic debloating, registry mass edits, disk formatting, account creation, or system-wide policy changes.
-- **No secrets in Git:** never commit tokens, passwords, SSH private keys or recovery keys.
-- **Versioned:** review diffs before running changes on your personal machine.
+- **No WinGet dependency:** packages are managed by Chocolatey (CLI 2.x compatible).
+- **No surprise upgrades or removals:** missing Chocolatey packages are installed; existing ones are skipped. Windox does not upgrade every installed application.
+- **No global execution-policy change:** the launcher temporarily permits execution of the downloaded scripts in the *current PowerShell process* and restores the previous setting. Group Policy may still restrict execution.
+- **No secrets in Git:** do not commit passwords, tokens, SSH private keys, or BitLocker recovery keys.
+- **Review code before remote execution:** `irm | iex` runs code fetched from a mutable `main` branch; you can pin it to a reviewed commit for stronger supply-chain protection.
+- **Elevation:** the UAC prompt uses the elevated user's profile. If your standard and admin accounts are different, user-scoped preferences will apply to the admin account; run settings under the intended account instead.
+- **Community packages:** Chocolatey community packages may depend on third-party downloads and are not guaranteed to be fully reproducible offline.
 
-## Planned improvements
-
-Add opt-in profiles (dev, gaming, media), managed app configuration, package version pinning where appropriate, better structured logging, backups for settings before modification, and PowerShell Pester tests.
-
-> Initial scaffold; not yet executed on a Windows machine. Review `config/packages.json` before running Apply.
+This initial release has **not yet been tested on a real Windows 11 machine**. Try Audit first when possible.
