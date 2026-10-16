@@ -4,6 +4,23 @@ param([ValidateSet('Audit','Apply')][string]$Mode = 'Audit')
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Ensure-RaidBotDirectory {
+    $path = 'C:\raidbot'
+    if (Test-Path -LiteralPath $path -PathType Container) {
+        Write-Host "[OK] $path"
+        return
+    }
+    if (Test-Path -LiteralPath $path) {
+        throw "Cannot create directory: another item already exists at $path"
+    }
+    if ($Mode -eq 'Audit') {
+        Write-Host "[MISSING] $path"
+        return
+    }
+    New-Item -Path $path -ItemType Directory -Force -ErrorAction Stop | Out-Null
+    Write-Host "[OK] Created $path"
+}
+
 function Find-PlariumPlay {
     $paths = @(
         (Join-Path $env:LOCALAPPDATA 'PlariumPlay\PlariumPlay.exe'),
@@ -126,6 +143,8 @@ function Install-RslXtender {
         }
     }
 }
+
+Ensure-RaidBotDirectory
 
 # Attempt both independent installations, even when one provider fails.
 $failures = New-Object 'System.Collections.Generic.List[string]'
