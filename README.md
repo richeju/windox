@@ -60,6 +60,9 @@ Initial applications: `7zip`, `powershell-core`, and `thunderbird`. Git and VS C
 
 ## Gaming: RAID and RSL-Xtender
 
+- **RaidBot workspace:** Windox creates `C:\raidbot` if it does not already exist. In Audit mode, it only reports whether the folder exists. Existing content is preserved.
+
+
 - **Plarium Play:** downloaded from `installer.plarium.com`, with a valid Plarium Authenticode signature required. Launched with `/S` (an unofficial community-documented silent flag; it must be verified on a real Windows PC).
 - **RAID: Shadow Legends:** after Plarium Play is installed, sign in with your **existing Plarium ID** and install RAID in the launcher. There is no confirmed fully unattended install of the game itself. Windox detects the game when present, but cannot bypass login.
 - **RSL-Xtender:** official [IRSwish/xtender](https://github.com/IRSwish/xtender/releases) portable ZIP, pinned to **v1.1.56** and verified against the GitHub release SHA-256 before silent extraction into `%ProgramData%\Windox\apps\RSL-Xtender\1.1.56`. A Start Menu shortcut is added. Existing installations in common user locations are not duplicated.
