@@ -127,10 +127,25 @@ function Install-RslXtender {
     }
 }
 
-Install-PlariumPlay
+# Attempt both independent installations, even when one provider fails.
+$failures = New-Object 'System.Collections.Generic.List[string]'
+try {
+    Install-PlariumPlay
+} catch {
+    Write-Warning "Plarium Play: $($_.Exception.Message)"
+    $failures.Add('Plarium Play')
+}
 if (Test-RaidInstalled) {
     Write-Host '[OK] RAID: Shadow Legends detected'
 } else {
     Write-Host '[INFO] RAID game installation requires signing in to Plarium Play.'
 }
-Install-RslXtender
+try {
+    Install-RslXtender
+} catch {
+    Write-Warning "RSL-Xtender: $($_.Exception.Message)"
+    $failures.Add('RSL-Xtender')
+}
+if ($failures.Count -gt 0) {
+    throw ("Some gaming installations failed: " + ($failures -join ', '))
+}
