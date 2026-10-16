@@ -16,9 +16,10 @@ What happens:
 1. The small remote launcher downloads the Windox repository into a temporary folder.
 2. `bootstrap.ps1` requests administrator privileges if required.
 3. `scripts/chocolatey.ps1` installs Chocolatey (if missing), then the packages in `config/packages.json`.
-4. `scripts/gaming.ps1` installs Plarium Play unattended and places RSL-Xtender in a managed portable directory.
-5. `scripts/system.ps1` applies the managed Windows preferences.
-6. The temporary checkout is deleted by the launcher.
+4. `scripts/browser.ps1` checks Chrome's default status and opens its Windows settings page if a change is needed.
+5. `scripts/gaming.ps1` installs Plarium Play unattended and places RSL-Xtender in a managed portable directory.
+6. `scripts/system.ps1` applies the managed Windows preferences.
+7. The temporary checkout is deleted by the launcher.
 
 A run can be repeated: packages already managed by Chocolatey and settings already matching the desired state are skipped. Packages installed outside Chocolatey are **not** automatically recognized as managed by Chocolatey; review the manifest before running.
 
@@ -51,12 +52,23 @@ windox/
 │   └── packages.json        # Chocolatey package IDs
 ├── scripts/
 │   ├── chocolatey.ps1       # Chocolatey bootstrap and package convergence
+│   ├── browser.ps1          # Chrome default-browser check and settings link
 │   ├── gaming.ps1           # Plarium Play and RSL-Xtender
 │   └── system.ps1           # Idempotent Windows settings
 └── .gitignore
 ```
 
-Initial applications: `7zip`, `powershell-core`, `thunderbird`, and `pcloud`. Git and VS Code are optional and not installed by default.
+Initial applications: `7zip`, `powershell-core`, `thunderbird`, `pcloud`, and `googlechrome`. Git and VS Code are optional and not installed by default.
+
+## Google Chrome
+
+Windox installs **Google Chrome silently** through the Chocolatey `googlechrome` package. It checks whether Chrome handles `http`, `https`, `.htm` and `.html` for the account running Windox.
+
+**Windows 11 protects an existing user's default-app choice.** There is no supported silent PowerShell command to force these per-user associations. If Chrome is not the default, Apply mode opens the official Windows Settings page for Chrome (via `ms-settings:defaultapps?registeredAppMachine=Google%20Chrome` when Chrome is registered machine-wide). Click **Set default** once. Audit mode only reports the current setting and does not open Settings.
+
+In environments where UAC requires signing in as a *different* administrator, Windox examines that administrator's profile, not the original user's. The normal user can finish the default-app selection in their own session through Settings > Apps > Default apps > Google Chrome.
+
+For provisioning *new user profiles*, Microsoft also supports importing a default-associations XML through DISM, but that does **not** retroactively change an existing logged-in user's defaults. Windox intentionally does not set a device-wide association policy or alter Windows' UserChoice registry hashes.
 
 ## Gaming: RAID and RSL-Xtender
 
