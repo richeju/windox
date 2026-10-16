@@ -61,6 +61,7 @@ Initial applications: `7zip`, `powershell-core`, and `thunderbird`. Git and VS C
 ## Gaming: RAID and RSL-Xtender
 
 - **RaidBot workspace:** Windox creates `C:\raidbot` if it does not already exist. In Audit mode, it only reports whether the folder exists. Existing content is preserved.
+- **Microsoft Defender:** Windox checks whether `C:\raidbot` is excluded from Defender scanning and adds only that directory in Apply mode (via `Add-MpPreference -ExclusionPath`). The exclusion persists, also affects files created later in the folder, and reduces protection; do not store untrusted downloads there. Audit mode is read-only. If a managed antivirus policy prevents this change, Windox reports a failure without switching off antivirus protection.
 
 
 - **Plarium Play:** downloaded from `installer.plarium.com`, with a valid Plarium Authenticode signature required. Launched with `/S` (an unofficial community-documented silent flag; it must be verified on a real Windows PC).
