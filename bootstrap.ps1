@@ -13,7 +13,7 @@ $manifestPath = Join-Path $root 'config/packages.json'
 
 function Write-Step([string]$Message) { Write-Host "[Windox] $Message" -ForegroundColor Cyan }
 
-if (-not $IsWindows -and $PSVersionTable.PSEdition -eq 'Core') {
+if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) {
     throw 'Windox runs on Windows only.'
 }
 if (-not (Test-Path $manifestPath)) { throw "Missing manifest: $manifestPath" }
