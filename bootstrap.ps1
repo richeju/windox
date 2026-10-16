@@ -45,6 +45,7 @@ if (-not (Test-Path -LiteralPath $manifestPath)) {
 
 Write-Step "Mode: $Mode"
 & (Join-Path $root 'scripts\chocolatey.ps1') -Mode $Mode -ManifestPath $manifestPath -SkipPackages:$SkipPackages
+& (Join-Path $root 'scripts\browser.ps1') -Mode $Mode
 & (Join-Path $root 'scripts\gaming.ps1') -Mode $Mode
 & (Join-Path $root 'scripts\system.ps1') -Mode $Mode
 Write-Step 'Completed.'
