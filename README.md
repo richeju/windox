@@ -54,7 +54,7 @@ windox/
 └── .gitignore
 ```
 
-Initial applications: `git`, `vscode`, `7zip`, and `powershell-core`.
+Initial applications: `7zip`, `powershell-core`, and `thunderbird`. Git and VS Code are optional and not installed by default.
 
 ## Design and safety
 
