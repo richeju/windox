@@ -5,6 +5,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $mode = if ($env:WINDOX_MODE) { $env:WINDOX_MODE } else { 'Audit' }
+# Consume the one-shot mode override so subsequent runs default back to Audit.
+Remove-Item Env:WINDOX_MODE -ErrorAction SilentlyContinue
 if ($mode -notin @('Audit', 'Apply')) {
     throw "Invalid WINDOX_MODE: $mode. Expected Audit or Apply."
 }
