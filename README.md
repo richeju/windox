@@ -56,7 +56,7 @@ windox/
 └── .gitignore
 ```
 
-Initial applications: `7zip`, `powershell-core`, and `thunderbird`. Git and VS Code are optional and not installed by default.
+Initial applications: `7zip`, `powershell-core`, `thunderbird`, and `pcloud`. Git and VS Code are optional and not installed by default.
 
 ## Gaming: RAID and RSL-Xtender
 
