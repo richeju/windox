@@ -1,0 +1,8 @@
+{
+  "packages": [
+    { "id": "Git.Git" },
+    { "id": "Microsoft.VisualStudioCode" },
+    { "id": "7zip.7zip" },
+    { "id": "Microsoft.PowerShell" }
+  ]
+}
