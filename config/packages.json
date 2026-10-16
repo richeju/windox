@@ -1,12 +1,6 @@
 {
   "packages": [
     {
-      "id": "git"
-    },
-    {
-      "id": "vscode"
-    },
-    {
       "id": "7zip"
     },
     {
